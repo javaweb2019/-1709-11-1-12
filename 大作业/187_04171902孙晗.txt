@@ -1,0 +1,298 @@
+电脑编程技巧与维护
+1 概述
+销售是企业生存的根本，企业销售环节中各项资源的管
+理是否合理直接关系到企业的生存和发展。传统销售环节中
+低效的人工管理方式已经不再适应当今信息化高速发展的需
+要，开发一种实用而高效的企业销售管理系统成为提高企业
+管理效率，增强企业市场竞争能力的有效手段。
+虽然，现在部分企业开发了自己的销售管理系统，但大
+多是基于C/S 模式，存在可重用程度低、功能简单、维护困
+难、应变能力差等问题，文中以某公司开发的销售管理系统
+项目为背景，介绍基于B/S 模式的企业销售管理系统的开发。
+2 系统分析
+2.1 技术要求
+本系统要求由销售主管负责管理，企业领导和客户可以根
+据需要能够实时查询相关信息，因此采用基于B/S （游览器/服
+务器） 的模式进行开发，将更加方便、快捷。在技术上使用
+JSP +JavaBean 组件能够很好地实现可重用性、可维护性和可扩
+展性，满足跨平台的需要。数据库管理系统根据系统的实际需
+要采用了MySQL 5.0 确保数据信息能够被高效率的存储和读取。
+2.2 系统功能
+系统功能如图1 所示。
+（1） 客户管理功能：包括对客户资料信息、客户来访信
+息和客户来电来函信息进行记录和管理，以方便企业领导和
+相关业务经理查看。
+（2） 内部人员管理功能：用来记录内部人员的信息、以
+及他在使用该系统中所具有的权限，同时方便企业领导把握
+各业务经理的销售业绩情况。
+（3） 销售管理功能：主要包括标书、合同、产品型号、产
+品配置、信息联络、资料领取等相关信息的记录和查询功能。
+（4） 售后管理功能：主要对发货情况、回款情况以及产
+品的维修情况进行记录，方便客户和企业领导的查询。
+（5） 售后账目管理：主要针对销售系统中产生的借支及
+花费情况进行管理和统计。
+3 系统实现
+本系统在数据库连接和数据处理方面大部分采用JavaBean
+组件技术，从而有效减轻了编程的工作量并提高了代码
+的可重用性。
+（1） 数据库连接JavaBean 组件conn.java 部分代码：
+package db;
+import java.sql.*;
+public class conn {
+public static Connection con=null;
+public Statement stmt=null;
+public ResultSet rs=null;
+private static String
+dbDriver=" org.gjt.mm.mysql.Driver" ;
+private static String
+B/S 模式下企业销售管理系统开发
+于训全，李强
+（湖南铁路科技职业技术学院，株洲412000）
+摘要： 分析了基于B/S 模式的企业销售管理系统的设计与实现，并用JSP 和JavaBean 技术完成了关键程序的编程。
+关键词： 销售管理系统；B/S 模式；JSP 技术；JavaBean 技术
+The Development of Enterprise Sales Management System Based on the B/S Pattern
+YU Xunquan，LI Qiang
+(Hunan Railway College of Science & Technology, Zhuzhou 412000)
+Abstract：This article introduces the design and implement of enterprise sales management system based on the B/S pattern.
+The programming method of main codes completed by the JSP and JavaBean technique is also presented.
+Key words：Sales Management System; B/S Pattern; JSP; JavaBean Technique
+本文收稿日期：2009-5-28
+某公司销售管理系统
+客户管理内部人员管理销售管理售后管理销售账目管理
+客户信息管理
+客户来访管理
+客户来电来函管理
+内部人员信息管理
+发货记录管理
+回款记录管理
+维修记录管理
+借款帐目管理
+花费情况管理
+标书管理
+合同管理
+产品型号管理
+产品配置管理
+产品配置相关信息联络单管理
+资料领取情况登记管理
+图1
+- 58 -
+DOI:10.16184/j.cnki.comprg.2009.16.017
+DATABASE AND INFORMATION MANAGEMENT 数据库和信息管理
+dbUrl=" jdbc:mysql://localhost/ld1" ;
+private static String dbUser=" root" ;
+private static String dbPwd="" ;//打开数据库连接
+public static Connection getConnection ()
+{
+try
+{
+Class.forName (dbDriver) ;//指定jdbc 驱动程序
+con =DriverManager.getConnection ( dbUrl,dbUser,
+dbPwd) ; //创建连接
+}
+catch (Exception e)
+{
+e.printStackTrace () ;
+}
+if (con == null)
+{
+System.err.println (" 警告:数据库连接失败!") ;
+}
+return con;
+}
+//读取结果集
+public ResultSet doQuery (String sql)
+{
+try
+{
+con=conn.getConnection () ;//建立连接
+stmt=con.createStatement (ResultSet.
+TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_
+READ_ONLY) ;
+rs=stmt.executeQuery (sql) ;
+}
+catch (SQLException e)
+{
+e.printStackTrace () ;
+}
+return rs;
+}
+//更新数据
+public int doUpdate (String sql)
+{
+int result=0;
+try
+{
+con=conn.getConnection () ;
+stmt=con.createStatement (ResultSet.
+TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_
+READ_ONLY) ;
+result=stmt.executeUpdate (sql) ;
+}
+catch (SQLException e)
+{
+result=0;
+}
+return result;
+}
+//进行预处理
+public PreparedStatement getPStmt (String sql) {
+try {
+con = getConnection () ;
+PreparedStatement stmt = con.prepareStatement (sql) ;
+return stmt;
+} catch (Exception e) {
+System.err.println (e.getMessage ()) ;
+e.printStackTrace () ;
+}
+return null;
+}
+//关闭数据库连接
+public void close ()
+{
+try
+{
+if (rs! =null)
+rs.close () ;
+}
+catch (Exception e)
+{
+e.printStackTrace () ;
+}
+try
+{
+if (stmt! =null)
+stmt.close () ;
+}
+catch (Exception e)
+{
+e.printStackTrace () ;
+}
+try
+{
+if (con! =null)
+con.close () ;
+}
+catch (Exception e)
+{
+e.printStackTrace () ;
+}
+}
+}
+（2） 客户数据的JavaBean 组件khbtj.java 部分代码：
+package khtj;
+import java.sql.PreparedStatement;
+…
+//set 和get 方法
+public String getKhaddr () {
+return khaddr;
+}
+public void setKhaddr (String khaddr) {
+this.khaddr = khaddr;
+}
+…
+//添加客户资料
+public int khb_add ()
+{String reg=" insert into kh values (?,?,?,?,?,?)" ;
+conn con=new conn () ;
+int i=1;
+try {
+String khname= str.dbEncode (this.khname) ;
+String khkw = str.dbEncode (this.khkw) ;
+- 59 -
+电脑编程技巧与维护
+不能成为其物流提供商。因此，物流企业的出入库管理信息化
+作业要求是一个很现实的并且很紧迫的问题，这也是下一步工
+作的方向。
+参考文献
+[1] 江少文. 现代仓储管理实务[M] . 北京：中国铁道出版社，
+2006，50~52.
+[2] 李广泰. 仓储与物料管控[M] . 深圳：海天出版社，2005：
+101~103.
+[3] 陈华军. J2EE 构建企业级应用方案[M] . 北京：人民邮
+电出版社，2002.
+[4] 宋杨主. 第三方物流模式与运作[M] . 北京：中国物资出
+版社，2006：100~102.
+作者简介
+秦贤涛（1964-），男，汉族，江苏省无锡市人，实验员，
+本科。
+图8 系统出库管理总界面
+String khpq = str.dbEncode (this.khpq) ;
+String khaddr = str.dbEncode (this.khaddr) ;
+String khyb = str.dbEncode (this.khyb) ;
+PreparedStatement pstmt = con.getPStmt (reg) ;
+pstmt.setInt (1,0) ;
+pstmt.setString (2, khname) ;
+pstmt.setString (3, khkw) ;
+pstmt.setString (4, khpq) ;
+pstmt.setString (5, khaddr) ;
+pstmt.setString (6, khyb) ;
+pstmt.executeUpdate () ;
+} catch (Exception e) {
+i = 0;
+}
+con.close () ;
+return i;
+}
+//删除客户资料
+public int khbdel (String khbid)
+{int i=0;
+String sql=" delete from kh where khid=" +khbid;
+conn con=new conn () ;
+i=con.doUpdate (sql) ;
+con.close () ;
+return i;
+}
+//显示客户信息
+public Vector khb_view (String khbid) throws SQLException
+{Vector<Object [] > v = new Vector<Object [] > () ;
+String sql = " select khid,khname,khkw,khpq,khaddr,
+khyb from kh where khid=" +khbid;
+conn con=new conn () ;
+ResultSet rs=con.doQuery (sql) ;
+while (rs.next ()) {
+Object [] obj=new Object [6] ;
+obj [0] = rs.getString (1) ;
+obj [1] = rs.getString (2) ;
+obj [2] = rs.getString (3) ;
+obj [3] = rs.getString (4) ;
+obj [4] = rs.getString (5) ;
+obj [5] = rs.getString (6) ;
+v.add (obj) ;
+}
+con.close () ;
+return v;
+}
+//修改客户资料
+public int khb_update ()
+{ String name = str.dbEncode (this.khname) ;
+String kw = str.dbEncode (this.khkw) ;
+String pq = str.dbEncode (this.khpq) ;
+String addr = str.dbEncode (this.khaddr) ;
+String sql=" update kh set khname='" +name+" ',
+khkw='" +kw+" ',khpq='" +pq+" ', khaddr='" +addr+" '
+where khid=" +khid;
+conn con=new conn () ;
+int i=0;
+i=con.doUpdate (sql) ;
+return i;
+}
+}
+4 结语
+这套管理系统，实际应用表明它促进了企业管理人员、
+业务经理和客户之间的信息沟通；加快资金的回笼；提高企
+业的办公效率。本系统采用JSP 和JavaBean 技术实现了显示
+界面与业务逻辑分离、支持跨平台、实现代码重用。
+参考文献
+[1] [美] Phil Hanana．JSP 技术大全[M] ． 北京：机械工业出
+版社，2002.
+[2] 刘洁，柏彦奇，樊延平，孙海涛． 基于JSP 的修理室综合
+业务管理信息系统[J] ． 微计算机信息，2005.
+[3] 孙卫琴. 精通Struts:基于MVC 的Java Web 设计与开发.
+北京：电子工业出版社，2004.
+作者简介
+于训全，男（1967-），湖南铁路科技职业技术学院副教授，
+计算机科学技术硕士，主研领域：计算机软件与理论、计算
+机教学。
+（上接第45 页）
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+- 60
